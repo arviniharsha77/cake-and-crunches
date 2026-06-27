@@ -463,6 +463,7 @@ function PageWrapper({ title, children }) {
 function LoginView() {
   const { login, user, showToast } = useContext(AuthContext);
   const [mode, setMode] = useState('login'); // 'login' or 'request-setup'
+  const [loginType, setLoginType] = useState('staff'); // 'staff' or 'admin'
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -525,7 +526,32 @@ function LoginView() {
                 C
               </div>
               <h2 className="text-2xl font-bold font-serif text-bakery-700 dark:text-bakery-100">Cakes & Crunches</h2>
-              <p className="text-sm text-bakery-700 dark:text-bakery-300 mt-1">Customer Allergy & Dietary Profile System</p>
+              <p className="text-sm text-bakery-700 dark:text-bakery-300 mt-1">Customer Allergy & Dietary Preference Profile System</p>
+            </div>
+
+            <div className="flex p-1 bg-bakery-50 dark:bg-bakery-950 rounded-xl mb-6 border border-bakery-100/50 dark:border-bakery-800/30">
+              <button
+                type="button"
+                onClick={() => { setLoginType('staff'); setUsername(''); setPassword(''); setError(''); }}
+                className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
+                  loginType === 'staff'
+                    ? 'bg-white dark:bg-bakery-800 text-bakery-600 dark:text-bakery-100 shadow-sm'
+                    : 'text-bakery-700 dark:text-bakery-400 hover:text-bakery-600'
+                }`}
+              >
+                Staff Login
+              </button>
+              <button
+                type="button"
+                onClick={() => { setLoginType('admin'); setUsername(''); setPassword(''); setError(''); }}
+                className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
+                  loginType === 'admin'
+                    ? 'bg-white dark:bg-bakery-800 text-bakery-600 dark:text-bakery-100 shadow-sm'
+                    : 'text-bakery-700 dark:text-bakery-400 hover:text-bakery-600'
+                }`}
+              >
+                Admin Login
+              </button>
             </div>
 
             {error && (
@@ -538,13 +564,13 @@ function LoginView() {
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div>
                 <label className="text-xs font-bold uppercase tracking-wider text-bakery-700 dark:text-bakery-300 block mb-1.5">
-                  Username or Email
+                  {loginType === 'admin' ? 'Email Address' : 'Username'}
                 </label>
                 <input
-                  type="text"
+                  type={loginType === 'admin' ? 'email' : 'text'}
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Enter username or admin email"
+                  placeholder={loginType === 'admin' ? 'admin@cakesandcrunches.com' : 'Enter staff username'}
                   className="w-full px-4 py-3 rounded-xl border border-bakery-100 dark:border-bakery-800 bg-white dark:bg-bakery-900 text-sm focus:outline-none focus:ring-2 focus:ring-bakery-500/30 focus:border-bakery-500 transition-all"
                   required
                 />
@@ -555,13 +581,15 @@ function LoginView() {
                   <label className="text-xs font-bold uppercase tracking-wider text-bakery-700 dark:text-bakery-300 block">
                     Password
                   </label>
-                  <button
-                    type="button"
-                    onClick={() => setMode('request-setup')}
-                    className="text-xs text-bakery-500 hover:underline font-bold"
-                  >
-                    Setup Admin Password
-                  </button>
+                  {loginType === 'admin' && (
+                    <button
+                      type="button"
+                      onClick={() => setMode('request-setup')}
+                      className="text-xs text-bakery-500 hover:underline font-bold"
+                    >
+                      Setup Admin Password
+                    </button>
+                  )}
                 </div>
                 <div className="relative">
                   <input
