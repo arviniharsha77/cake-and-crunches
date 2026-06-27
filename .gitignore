@@ -1,0 +1,16 @@
+# Pycache
+__pycache__/
+*.pyc
+
+# Databases
+*.db
+backend/instance/
+instance/
+
+# Local MinGit
+mingit/
+
+# IDE files
+.vscode/
+.idea/
+.antigravityignore
