@@ -463,8 +463,8 @@ function PageWrapper({ title, children }) {
 function LoginView() {
   const { login, user, showToast } = useContext(AuthContext);
   const [mode, setMode] = useState('login'); // 'login' or 'request-setup'
-  const [username, setUsername] = useState('staff');
-  const [password, setPassword] = useState('staff123');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [emailInput, setEmailInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -594,25 +594,7 @@ function LoginView() {
               </button>
             </form>
 
-            <div className="mt-6 pt-6 border-t border-bakery-50 dark:border-bakery-800/40 text-center">
-              <p className="text-[11px] font-semibold text-bakery-700 dark:text-bakery-300 uppercase tracking-wider mb-2">
-                Demo Credentials
-              </p>
-              <div className="flex gap-2 justify-center">
-                <button
-                  onClick={() => { setUsername('staff'); setPassword('staff123'); }}
-                  className="px-3 py-1.5 rounded-lg border border-bakery-100 dark:border-bakery-800 text-xs font-medium bg-bakery-50 dark:bg-bakery-900 hover:border-bakery-500 transition-all text-bakery-700 dark:text-bakery-700 dark:text-bakery-200"
-                >
-                  Staff Account
-                </button>
-                <button
-                  onClick={() => { setUsername('admin@cakesandcrunches.com'); setPassword('admin@123'); }}
-                  className="px-3 py-1.5 rounded-lg border border-bakery-100 dark:border-bakery-800 text-xs font-medium bg-bakery-50 dark:bg-bakery-900 hover:border-bakery-500 transition-all text-bakery-700 dark:text-bakery-700 dark:text-bakery-200"
-                >
-                  Admin Account
-                </button>
-              </div>
-            </div>
+
           </>
         ) : (
           <>
