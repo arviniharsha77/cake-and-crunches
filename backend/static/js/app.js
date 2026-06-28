@@ -168,9 +168,8 @@ function AuthProvider({ children }) {
   useEffect(() => {
     checkAuth();
     
-    // Check Dark Mode preference
-    const isDark = localStorage.getItem('theme') === 'dark' || 
-                   (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    // Check Dark Mode preference (default to light theme, ignoring system prefers-color-scheme)
+    const isDark = localStorage.getItem('theme') === 'dark';
     setDarkMode(isDark);
     if (isDark) {
       document.documentElement.classList.add('dark');
