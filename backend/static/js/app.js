@@ -966,6 +966,8 @@ function CustomerListView() {
   // Modals
   const [showModal, setShowModal] = useState(false);
   const [editCustId, setEditCustId] = useState(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+  const [deleteConfirmName, setDeleteConfirmName] = useState('');
   
   // Form State
   const [formData, setFormData] = useState({
@@ -1020,10 +1022,10 @@ function CustomerListView() {
   };
 
   const handleDelete = async (cid) => {
-    if (!window.confirm("Are you sure you want to delete this customer's profile?")) return;
     try {
       await axios.delete(`/api/customers/${cid}`);
       showToast('Customer deleted successfully', 'success');
+      setDeleteConfirmId(null);
       fetchCustomers();
     } catch (err) {
       showToast(err.response?.data?.message || 'Delete failed', 'danger');
@@ -1169,7 +1171,7 @@ function CustomerListView() {
                       <Icon name="edit" className="w-4 h-4" />
                     </button>
                     <button
-                      onClick={() => handleDelete(c.id)}
+                      onClick={() => { setDeleteConfirmId(c.id); setDeleteConfirmName(c.full_name); }}
                       className="p-1.5 rounded-lg bg-bakery-50 dark:bg-bakery-800/40 text-bakery-700 dark:text-bakery-700 dark:text-bakery-200 hover:bg-red-500/10 hover:text-red-500 transition-colors"
                       title="Delete Customer"
                     >
@@ -1500,6 +1502,38 @@ function CustomerListView() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {deleteConfirmId && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[999] flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-bakery-900 rounded-2xl max-w-md w-full p-6 shadow-xl border border-bakery-100 dark:border-bakery-800/50">
+            <div className="flex items-center gap-3 text-red-500 mb-4">
+              <div className="p-2 bg-red-500/10 rounded-xl">
+                <Icon name="warning" className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-bold font-serif text-bakery-700 dark:text-bakery-200">Delete Customer Profile</h3>
+            </div>
+            <p className="text-sm text-bakery-700 dark:text-bakery-300 mb-6 leading-relaxed">
+              Are you sure you want to permanently delete the profile of <strong className="text-bakery-900 dark:text-white">{deleteConfirmName}</strong>? This action will also delete all of their past order history and cannot be undone.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmId(null)}
+                className="px-4 py-2 text-sm font-semibold rounded-xl border border-bakery-100 dark:border-bakery-800 text-bakery-700 dark:text-bakery-300 hover:bg-bakery-50 dark:hover:bg-bakery-800 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDelete(deleteConfirmId)}
+                className="px-4 py-2 text-sm font-semibold rounded-xl bg-red-600 hover:bg-red-700 text-white shadow-sm transition-colors"
+              >
+                Confirm Delete
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -2055,6 +2089,8 @@ function ProductListView() {
   // Modal / Form state
   const [showModal, setShowModal] = useState(false);
   const [editId, setEditId] = useState(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+  const [deleteConfirmName, setDeleteConfirmName] = useState('');
   
   const [formData, setFormData] = useState({
     name: '', category: 'Cake', price: '', description: '', status: 'Active'
@@ -2098,10 +2134,10 @@ function ProductListView() {
   };
 
   const handleDelete = async (pid) => {
-    if (!window.confirm("Are you sure you want to remove this product?")) return;
     try {
-      await axios.delete(`/api/products/${pid}`);
-      showToast('Product deleted', 'success');
+      const res = await axios.delete(`/api/products/${pid}`);
+      showToast(res.data.message || 'Product deleted', 'success');
+      setDeleteConfirmId(null);
       fetchData();
     } catch (err) {
       showToast(err.response?.data?.message || 'Delete failed', 'danger');
@@ -2271,7 +2307,7 @@ function ProductListView() {
                         <Icon name="edit" className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => handleDelete(p.id)}
+                        onClick={() => { setDeleteConfirmId(p.id); setDeleteConfirmName(p.name); }}
                         className="p-1.5 rounded-lg bg-bakery-50 dark:bg-bakery-800/40 hover:bg-red-500/10 hover:text-red-500 transition-colors"
                       >
                         <Icon name="delete" className="w-4 h-4" />
@@ -2441,6 +2477,42 @@ function ProductListView() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {deleteConfirmId && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[999] flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-bakery-900 rounded-2xl max-w-md w-full p-6 shadow-xl border border-bakery-100 dark:border-bakery-800/50">
+            <div className="flex items-center gap-3 text-red-500 mb-4">
+              <div className="p-2 bg-red-500/10 rounded-xl">
+                <Icon name="warning" className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-bold font-serif text-bakery-700 dark:text-bakery-200">Remove Product</h3>
+            </div>
+            <p className="text-sm text-bakery-700 dark:text-bakery-300 mb-6 leading-relaxed">
+              Are you sure you want to remove <strong className="text-bakery-900 dark:text-white">{deleteConfirmName}</strong> from the catalog?
+              <br />
+              <span className="text-xs text-bakery-500 dark:text-bakery-400 mt-2 block">
+                Note: If this product has been ordered previously, it will be marked as Inactive so past order history remains intact.
+              </span>
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmId(null)}
+                className="px-4 py-2 text-sm font-semibold rounded-xl border border-bakery-100 dark:border-bakery-800 text-bakery-700 dark:text-bakery-300 hover:bg-bakery-50 dark:hover:bg-bakery-800 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDelete(deleteConfirmId)}
+                className="px-4 py-2 text-sm font-semibold rounded-xl bg-red-600 hover:bg-red-700 text-white shadow-sm transition-colors"
+              >
+                Confirm Delete
+              </button>
+            </div>
           </div>
         </div>
       )}

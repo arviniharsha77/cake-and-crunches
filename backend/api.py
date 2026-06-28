@@ -452,7 +452,10 @@ def delete_product(current_user, pid):
     # Check if used in order items
     ordered = OrderItem.query.filter_by(product_id=pid).first()
     if ordered:
-        return jsonify({'error': 'Conflict', 'message': f"Cannot delete '{name}' because it has been ordered previously"}), 409
+        product.status = 'Inactive'
+        db.session.commit()
+        log_activity(current_user.id, "Deactivate Product", f"Marked product {name} as Inactive due to existing orders. Product ID: {pid}")
+        return jsonify({'message': f"Product '{name}' is linked to past orders and has been set to Inactive."})
         
     db.session.delete(product)
     db.session.commit()
