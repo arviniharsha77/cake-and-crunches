@@ -120,7 +120,6 @@ const AuthContext = createContext(null);
 function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
   const [notifs, setNotifs] = useState([]);
   const [unreadNotifsCount, setUnreadNotifsCount] = useState(0);
   const [toasts, setToasts] = useState([]);
@@ -167,30 +166,10 @@ function AuthProvider({ children }) {
 
   useEffect(() => {
     checkAuth();
-    
-    // Check Dark Mode preference (default to light theme, ignoring system prefers-color-scheme)
-    const isDark = localStorage.getItem('theme') === 'dark';
-    setDarkMode(isDark);
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    // Force light mode
+    document.documentElement.classList.remove('dark');
+    localStorage.removeItem('theme');
   }, []);
-
-  const toggleDarkMode = () => {
-    const nextDark = !darkMode;
-    setDarkMode(nextDark);
-    if (nextDark) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-      showToast('Espresso Dark Mode activated', 'info');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-      showToast('Creamy Light Mode activated', 'info');
-    }
-  };
 
   const login = async (username, password) => {
     try {
@@ -240,7 +219,7 @@ function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider value={{
-      user, loading, login, logout, darkMode, toggleDarkMode,
+      user, loading, login, logout,
       notifs, unreadNotifsCount, fetchNotifications, markNotificationRead, readAllNotifications,
       toasts, showToast, checkAuth
     }}>
@@ -355,7 +334,7 @@ function Sidebar() {
 }
 
 function Header({ title }) {
-  const { user, darkMode, toggleDarkMode, notifs, unreadNotifsCount, markNotificationRead, readAllNotifications } = useContext(AuthContext);
+  const { user, notifs, unreadNotifsCount, markNotificationRead, readAllNotifications } = useContext(AuthContext);
   const [showNotifPanel, setShowNotifPanel] = useState(false);
 
   return (
@@ -365,13 +344,6 @@ function Header({ title }) {
       </div>
 
       <div className="flex items-center gap-4">
-        {/* Dark Mode toggle */}
-        <button
-          onClick={toggleDarkMode}
-          className="w-10 h-10 rounded-xl bg-bakery-50 hover:bg-bakery-100 dark:bg-bakery-800/40 dark:hover:bg-bakery-800/80 border border-bakery-100 dark:border-bakery-800 text-bakery-700 dark:text-bakery-700 dark:text-bakery-200 flex items-center justify-center transition-colors"
-        >
-          <Icon name={darkMode ? 'sun' : 'moon'} className="w-5 h-5" />
-        </button>
 
         {/* Notifications Icon with Dropdown */}
         <div className="relative">
