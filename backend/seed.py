@@ -26,12 +26,12 @@ def seed_db():
     admin.set_password('admin@123')
     
     staff = User(username='staff', role='staff', full_name='Bakery Staff', email='staff@cakesandcrunches.com')
-    staff.set_password('staff123')
+    staff.set_password('staff@123')
     
     db.session.add(admin)
     db.session.add(staff)
     db.session.commit()
-    print("Users seeded: admin/admin@123, staff/staff123")
+    print("Users seeded: admin/admin@123, staff/staff@123")
     
     # 3. Add Ingredients
     ingredients_data = [
