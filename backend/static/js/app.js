@@ -3187,10 +3187,102 @@ function ReportsView() {
     };
   }, [repStats]);
 
-  const handleDownload = (type) => {
-    // Standard link download endpoint triggers browser download save dialog
-    window.location.href = `/api/reports/download?type=${type}&format=csv`;
-    showToast(`Downloading ${type} CSV report...`, 'success');
+  const generatePDFReport = (type, title, headers, rows) => {
+    try {
+      const { jsPDF } = window.jspdf;
+      if (!jsPDF) {
+        showToast('jsPDF library not loaded', 'danger');
+        return;
+      }
+      
+      const orientation = (type === 'customers' || type === 'orders') ? 'landscape' : 'portrait';
+      const doc = new jsPDF({
+        orientation: orientation,
+        unit: 'mm',
+        format: 'a4'
+      });
+      
+      const primaryColor = [214, 123, 80]; // bakery-500
+      const darkTextColor = [29, 17, 13]; // bakery-900
+      
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      
+      // Header Banner
+      doc.setFillColor(...primaryColor);
+      doc.rect(0, 0, pageWidth, 32, 'F');
+      
+      // Title
+      doc.setTextColor(255, 255, 255);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(20);
+      doc.text("Cakes and Crunches Bakery", 15, 14);
+      
+      // Subtitle
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+      doc.text(`${title} - Data Export`, 15, 22);
+      
+      // Metadata (right aligned)
+      doc.setFontSize(9);
+      doc.text(`Generated: ${new Date().toLocaleString()}`, pageWidth - 15, 14, { align: 'right' });
+      doc.text(`Format: PDF Table`, pageWidth - 15, 22, { align: 'right' });
+      
+      // Add table using autoTable
+      doc.autoTable({
+        head: [headers],
+        body: rows,
+        startY: 38,
+        margin: { left: 15, right: 15 },
+        styles: {
+          fontSize: 8.5,
+          cellPadding: 3,
+          valign: 'middle',
+          textColor: darkTextColor
+        },
+        headStyles: {
+          fillColor: primaryColor,
+          textColor: [255, 255, 255],
+          fontStyle: 'bold'
+        },
+        alternateRowStyles: {
+          fillColor: [250, 246, 240] // Soft cream background matching bg-bakery-50
+        },
+        didDrawPage: function(data) {
+          // Footer
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(8);
+          doc.setTextColor(120, 120, 120);
+          const pageStr = "Page " + doc.internal.getNumberOfPages();
+          doc.text(pageStr, pageWidth - 15, pageHeight - 10, { align: 'right' });
+          doc.text("Confidential - For Internal Use Only", 15, pageHeight - 10);
+        }
+      });
+      
+      const fileDate = new Date().toISOString().slice(0, 10);
+      doc.save(`${type}_report_${fileDate}.pdf`);
+      showToast(`${title} PDF downloaded!`, 'success');
+    } catch (err) {
+      console.error('PDF generation error:', err);
+      showToast('Failed to generate PDF', 'danger');
+    }
+  };
+
+  const handleDownload = async (type) => {
+    let title = 'Customers Profile Catalog';
+    if (type === 'orders') title = 'Orders History';
+    if (type === 'allergies') title = 'Allergen Registry';
+    
+    showToast(`Generating ${title} PDF...`, 'info');
+    
+    try {
+      const res = await axios.get(`/api/reports/download?type=${type}&format=json`);
+      const { headers, rows } = res.data;
+      generatePDFReport(type, title, headers, rows);
+    } catch (err) {
+      console.error(err);
+      showToast('Error downloading report data', 'danger');
+    }
   };
 
   if (loading) {

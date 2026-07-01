@@ -690,6 +690,33 @@ def download_report(current_user):
     rep_format = request.args.get('format', 'csv')
     rep_type = request.args.get('type', 'customers') # 'customers', 'orders', 'allergies'
     
+    if rep_format == 'json':
+        headers = []
+        rows = []
+        if rep_type == 'customers':
+            headers = ['ID', 'Full Name', 'Phone', 'Email', 'Gender', 'DOB', 'Preferred Contact', 'Allergies', 'Dietary Preferences']
+            customers = Customer.query.all()
+            for c in customers:
+                allergies_str = ", ".join([f"{a.allergy_name} ({a.severity})" for a in c.allergies])
+                diet_str = ", ".join([d.preference_name for d in c.diet_preferences])
+                rows.append([c.id, c.full_name, c.phone, c.email, c.gender, str(c.dob) if c.dob else '', c.preferred_contact, allergies_str, diet_str])
+        elif rep_type == 'orders':
+            headers = ['Order ID', 'Customer Name', 'Delivery Date', 'Status', 'Total Amount', 'Special Instructions', 'Date Created']
+            orders = Order.query.all()
+            for o in orders:
+                cust_name = o.customer.full_name if o.customer else 'Unknown'
+                delivery_date_str = str(o.delivery_date) if o.delivery_date else ''
+                rows.append([o.id, cust_name, delivery_date_str, o.status, f"${o.total_amount:.2f}", o.special_instructions, o.created_at.strftime('%Y-%m-%d %H:%M')])
+        elif rep_type == 'allergies':
+            headers = ['Allergy Name', 'Customer ID', 'Customer Name', 'Severity', 'Notes']
+            allergies = CustomerAllergy.query.all()
+            for a in allergies:
+                cust_name = a.customer.full_name if a.customer else 'Unknown'
+                rows.append([a.allergy_name, a.customer_id, cust_name, a.severity, a.notes])
+        else:
+            return jsonify({'error': 'Invalid report type'}), 400
+        return jsonify({'headers': headers, 'rows': rows})
+
     output = io.StringIO()
     writer = csv.writer(output)
     

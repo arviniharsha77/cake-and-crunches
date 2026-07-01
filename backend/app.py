@@ -48,6 +48,13 @@ def create_app():
         # Otherwise serve index.html for client-side routing
         return render_template('index.html')
 
+    @app.after_request
+    def add_header(response):
+        response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '-1'
+        return response
+
     # Automatically create database tables within app context
     with app.app_context():
         db.create_all()
